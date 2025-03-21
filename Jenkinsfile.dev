@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE_NAME = 'apisix'
+        DOCKERFILE_NAME = 'Dockerfile.apisix'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'git@github.com:shamim-kuet/apisix-k8s.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${env.DOCKER_IMAGE_NAME}", "-f ${env.DOCKERFILE_NAME} .")
+                }
+            }
+        }
+
+        // stage('Push Docker Image') {
+        //     steps {
+        //         script {
+        //             docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+        //                 docker.image("${env.DOCKER_IMAGE_NAME}").push()
+        //             }
+        //         }
+        //     }
+        // }
+    }
+
+    post {
+        success {
+            echo 'Docker image built and pushed successfully!'
+        }
+        failure {
+            echo 'Failed to build or push Docker image.'
+        }
+    }
+}
