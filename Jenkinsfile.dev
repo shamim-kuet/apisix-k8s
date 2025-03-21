@@ -9,27 +9,29 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git@github.com:shamim-kuet/apisix-k8s.git'
+                git branch: 'deployment-dev', url: 'git@github.com:shamim-kuet/apisix-k8s.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Build the Docker image
                     docker.build("${env.DOCKER_IMAGE_NAME}", "-f ${env.DOCKERFILE_NAME} .")
                 }
             }
         }
 
-        // stage('Push Docker Image') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-        //                 docker.image("${env.DOCKER_IMAGE_NAME}").push()
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push the Docker image to a registry (e.g., Docker Hub)
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        docker.image("${env.DOCKER_IMAGE_NAME}").push()
+                    }
+                }
+            }
+        }
     }
 
     post {
